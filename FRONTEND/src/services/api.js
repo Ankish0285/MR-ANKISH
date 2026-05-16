@@ -1,4 +1,5 @@
-const API_BASE = "/api";
+// Production: Use deployed backend URL from env, Dev: Use relative path with local proxy
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
 
 const TOKEN_KEY = "admin_token";
 
@@ -21,10 +22,10 @@ async function parseJson(res) {
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
-    const hint =
-      res.status === 503 || res.status === 502 || res.status === 500
-        ? " From FRONTEND run npm run dev so Flask starts on port 5000, or run python app.py in BACKEND."
-        : "";
+    const isServerDown = res.status === 503 || res.status === 502 || res.status === 500;
+    const hint = isServerDown
+      ? " Backend API is unreachable. Ensure both Vercel frontend and Render backend are deployed and running."
+      : "";
     throw new Error(
       text?.trim()
         ? `Server returned non-JSON (${res.status}).${hint}`
@@ -116,10 +117,11 @@ export async function adminLogin(username, password) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
+      credentials: "include", // Include cookies if backend uses them
     });
   } catch {
     throw new Error(
-      "Network error — from FRONTEND run npm run dev (API + site), or start Flask in BACKEND."
+      "Network error — Backend API is unreachable. Check that Render backend is running."
     );
   }
   const data = await parseJson(res);
@@ -130,6 +132,7 @@ export async function adminLogin(username, password) {
 export async function adminFetch(path, options = {}) {
   const res = await fetch(`${API_BASE}/admin${path}`, {
     ...options,
+    credentials: "include", // Include credentials for CORS
     headers: { ...authHeaders(), ...options.headers },
   });
   if (res.status === 401) {
@@ -147,6 +150,7 @@ export async function adminUploadImage(file) {
   fd.append("file", file);
   const res = await fetch(`${API_BASE}/admin/upload`, {
     method: "POST",
+    credentials: "include", // Include credentials for CORS
     headers: token ? { Authorization: `Bearer ${token}` } : {},
     body: fd,
   });

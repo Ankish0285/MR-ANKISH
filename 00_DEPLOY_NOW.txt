@@ -1,0 +1,78 @@
+# ⚡ DEPLOY NOW - 3 COMMANDS ONLY!
+
+## 🎯 Copy & Paste These Commands
+
+Open your terminal in the project root and run:
+
+```bash
+git add .
+```
+
+```bash
+git commit -m "Production setup: Vercel + Render integration - CORS, env vars, JWT auth"
+```
+
+```bash
+git push origin main
+```
+
+---
+
+## ⏱️ After You Push
+
+**Wait time:** 5-15 minutes
+
+- **Vercel builds:** 2-5 minutes → https://mr-ankish.vercel.app
+- **Render builds:** 3-10 minutes → https://mr-ankish.onrender.com
+
+---
+
+## ✅ Quick Verification (After Deploy)
+
+1. **Frontend loads?**
+   - Visit: https://mr-ankish.vercel.app
+   - Should see your portfolio ✅
+
+2. **Backend responds?**
+   - Visit: https://mr-ankish.onrender.com/api/health
+   - Should see: `{"status":"ok","mongo":"connected"}` ✅
+
+3. **Admin login works?**
+   - Go to: https://mr-ankish.vercel.app/admin/login
+   - Enter credentials
+   - Should see dashboard ✅
+
+4. **No CORS errors?**
+   - Open browser console (F12)
+   - Should be clean ✅
+
+---
+
+## 📝 What Was Changed
+
+| File | Change |
+|------|--------|
+| `BACKEND/app.py` | ✅ CORS restricted to Vercel domain |
+| `FRONTEND/src/services/api.js` | ✅ Uses env variable for API URL |
+| `FRONTEND/.env.production` | ✅ Created with backend URL |
+| `.gitignore` | ✅ Already ignores DONT_TOUCH/ |
+
+---
+
+## 🚨 If Vercel Env Var Isn't Set
+
+Go to: https://vercel.com/dashboard
+- Select your project
+- Settings → Environment Variables
+- Add: `VITE_API_URL` = `https://mr-ankish.onrender.com`
+- Save and redeploy
+
+---
+
+## 🎉 That's It!
+
+Just run those 3 commands. Everything else is automatic! 🚀
+
+---
+
+**Status: ✅ READY TO DEPLOY**

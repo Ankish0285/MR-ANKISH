@@ -34,7 +34,15 @@ if not _secret:
     _secret = "dev-only-set-SECRET_KEY-in-dotenv"
 app.config["SECRET_KEY"] = _secret
 
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# Configure CORS for production and development
+# Production: Only allow Vercel frontend
+# Development: Allow localhost
+ALLOWED_ORIGINS = [
+    "https://mr-ankish.vercel.app",  # Production Vercel frontend
+    "http://localhost:5173",  # Dev Vite frontend
+    "http://127.0.0.1:5173",  # Dev Vite frontend (localhost IP)
+]
+CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS, "supports_credentials": True}})
 
 app.register_blueprint(projects_bp, url_prefix="/api")
 app.register_blueprint(cms_public_bp, url_prefix="/api")
