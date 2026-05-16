@@ -59,13 +59,7 @@ def init_db() -> None:
 
     db_name = (os.getenv("MONGO_DB_NAME") or "portfolio").strip() or "portfolio"
     try:
-        client = MongoClient(
-            uri, 
-            serverSelectionTimeoutMS=20000, 
-            connectTimeoutMS=20000,
-            tls=True,
-            tlsInsecure=True
-        )
+        client = MongoClient(\n            uri,\n            serverSelectionTimeoutMS=20000,\n            connectTimeoutMS=20000,\n            tls=True,\n            tlsCAFile=certifi.where(),\n        )
         log.info("Pinging MongoDB...")
         client.admin.command("ping")
         log.info("MongoDB ping successful.")
@@ -90,3 +84,4 @@ def get_db():
     if _db is None:
         raise DatabaseUnavailable(_mongo_error or "Database is not available. Check MONGO_URI and network.")
     return _db
+
