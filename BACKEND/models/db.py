@@ -1,25 +1,27 @@
 import logging
 import os
-import ssl
 from typing import Optional
 
 import certifi
-from pymongo import MongoClient  # pyright: ignore[reportMissingImports]
+from pymongo import MongoClient
 
 log = logging.getLogger(__name__)
 
 
 def _friendly_mongo_message(raw: str) -> str:
+    """
+    Converts raw MongoDB error strings into user-friendly Hindi/English messages.
+    """
     low = raw.lower()
     if "bad auth" in low or "authentication failed" in low:
         return (
-            "MongoDB Atlas ne login reject kiya — username ya password galat hai. "
-            "Atlas → Database Access → apne user (jaise my_radha) par Edit → password reset karo, "
+            "MongoDB Atlas ne login reject kiya - username ya password galat hai. "
+            "Atlas -> Database Access -> apne user (jaise my_radha) par Edit -> password reset karo, "
             "phir .env mein MONGO_URI update karo. Password mein @ ho to URI mein %40 likho."
         )
     if "timed out" in low or "timeout" in low:
         return (
-            "MongoDB tak connect nahi ho paya (timeout). Atlas → Network Access → IP allowlist check karo."
+            "MongoDB tak connect nahi ho paya (timeout). Atlas -> Network Access -> IP allowlist check karo."
         )
     return f"MongoDB error: {raw}"
 
@@ -30,58 +32,80 @@ _mongo_error: Optional[str] = None
 
 
 class DatabaseUnavailable(Exception):
-    """MongoDB missing, unreachable, or not initialized."""
+    """Exception raised when MongoDB is missing, unreachable, or not initialized."""
 
 
 def mongo_status() -> dict:
-    """For /api/health — never raises."""
+    """
+    Returns the current status of the MongoDB connection for health check APIs.
+    """
     if _db is not None:
         return {"ok": True, "detail": None}
     return {"ok": False, "detail": _mongo_error or "Database not initialized"}
 
 
 def init_db() -> None:
-    """Connect to MongoDB if possible. Never raises — Flask stays up for /api/health."""
+    """
+    Initializes the MongoDB connection using the URI from environment variables.
+    This function is production-ready and compatible with Render deployment.
+    """
     global _client, _db, _mongo_error
     _client = None
     _db = None
     _mongo_error = None
 
+    # Load URI and DB Name from environment variables
     uri = (os.getenv("MONGO_URI") or "").strip()
-    if not uri:
-        _mongo_error = "MONGO_URI is not set. Add it to .env at the project root (folder that contains BACKEND)."
-        log.warning("%s", _mongo_error)
-        return
-    
-    # Debug: Print URI length and masked version
-    masked = uri[:15] + "..." + uri[-15:] if len(uri) > 30 else "too short"
-    log.info("Connecting to URI: %s (length: %d)", masked, len(uri))
+    db_name = (os.getenv("MONGO_DB_NAME") or "portfolio").strip()
 
-    db_name = (os.getenv("MONGO_DB_NAME") or "portfolio").strip() or "portfolio"
+    if not uri:
+        _mongo_error = "MONGO_URI is not set in environment variables."
+        log.warning(_mongo_error)
+        return
+
     try:
-        client = MongoClient(\n            uri,\n            serverSelectionTimeoutMS=20000,\n            connectTimeoutMS=20000,\n            tls=True,\n            tlsCAFile=certifi.where(),\n        )
+        # Production-ready MongoClient initialization
+        # Uses certifi for TLS/SSL certificates and sets appropriate timeouts
+        client = MongoClient(
+            uri,
+            serverSelectionTimeoutMS=20000,
+            connectTimeoutMS=20000,
+            tls=True,
+            tlsCAFile=certifi.where(),
+        )
+
+        # Ping the database to verify the connection
         log.info("Pinging MongoDB...")
         client.admin.command("ping")
         log.info("MongoDB ping successful.")
+
         db = client[db_name]
+
+        # Create necessary indexes for performance
         db.contacts.create_index([("created_at", -1)])
         db.projects.create_index([("created_at", -1)])
         db.skills.create_index([("order", 1), ("created_at", -1)])
         db.experience.create_index([("created_at", -1)])
         db.blog.create_index([("date", -1), ("created_at", -1)])
+
         _client = client
         _db = db
-        log.info("MongoDB connected: db=%s", db_name)
+        log.info("Successfully connected to MongoDB database: %s", db_name)
+
     except Exception as e:
-        raw = str(e)
-        _mongo_error = _friendly_mongo_message(raw)
-        log.warning("MongoDB init failed: %s", raw)
+        raw_error = str(e)
+        _mongo_error = _friendly_mongo_message(raw_error)
+        log.error("MongoDB initialization failed: %s", raw_error)
         _client = None
         _db = None
 
 
 def get_db():
+    """
+    Returns the database instance. Raises DatabaseUnavailable if not connected.
+    """
     if _db is None:
-        raise DatabaseUnavailable(_mongo_error or "Database is not available. Check MONGO_URI and network.")
+        raise DatabaseUnavailable(
+            _mongo_error or "Database is not available. Please check MONGO_URI and network settings."
+        )
     return _db
-
