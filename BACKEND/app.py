@@ -75,6 +75,14 @@ def _api_json_errors(exc):
     raise exc
 
 
+@app.route("/")
+def home():
+    return {
+        "status": "success",
+        "message": "MR ANKISH Backend Running Successfully"
+    }
+
+
 @app.get("/api/health")
 def health():
     m = mongo_status()
