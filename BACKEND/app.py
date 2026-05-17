@@ -38,7 +38,7 @@ if not _secret:
 app.config["SECRET_KEY"] = _secret
 
 # Configure CORS for production and development
-_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+_origins = os.getenv("ALLOWED_ORIGINS", "https://mr-ankish.vercel.app").split(",")
 ALLOWED_ORIGINS = [o.strip() for o in _origins if o.strip()]
 
 CORS(app, resources={

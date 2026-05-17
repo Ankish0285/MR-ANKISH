@@ -14,7 +14,7 @@ _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 @contact_bp.route("/contact", methods=["POST", "OPTIONS"])
 def save_contact():
     if request.method == "OPTIONS":
-        return "", 200
+        return jsonify({"ok": True}), 200
     data = request.get_json(silent=True) or {}
     name = (data.get("name") or "").strip()
     email = (data.get("email") or "").strip()
