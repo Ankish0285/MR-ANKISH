@@ -58,7 +58,8 @@ def admin_login():
         expected_u = (os.getenv("ADMIN_USER") or "").strip()
         expected_p = (os.getenv("ADMIN_PASS") or "").strip()
 
-        current_app.logger.info(f"Login attempt received for user: {username}")
+        print(f"DEBUG: Login attempt for user '{username}'")
+        print(f"DEBUG: Expected user set: {bool(expected_u)}, Expected pass set: {bool(expected_p)}")
 
         if not expected_u or not expected_p:
             current_app.logger.error("Login failed: ADMIN_USER or ADMIN_PASS environment variables are missing!")

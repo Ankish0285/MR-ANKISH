@@ -59,27 +59,33 @@ def init_db() -> None:
     db_name = (os.getenv("MONGO_DB_NAME") or "portfolio").strip()
 
     if not uri:
-        _mongo_error = "MONGO_URI is not set in environment variables."
-        log.warning(_mongo_error)
+        _mongo_error = "CRITICAL: MONGO_URI is not set in environment variables!"
+        log.error(_mongo_error)
+        print(_mongo_error)  # Ensure it shows in Render console
         return
+
+    # Basic logging for debugging (no sensitive data)
+    masked_uri = uri.split("@")[-1] if "@" in uri else "hidden"
+    log.info(f"Attempting to connect to MongoDB cluster: {masked_uri}")
+    print(f"DEBUG: Connecting to DB: {db_name}")
 
     try:
         # Production-ready MongoClient initialization
-        # Uses certifi for TLS/SSL certificates and sets appropriate timeouts
         client = MongoClient(
             uri,
-            serverSelectionTimeoutMS=10000,  # 10 seconds to find server
-            connectTimeoutMS=10000,         # 10 seconds to connect
-            socketTimeoutMS=10000,
+            serverSelectionTimeoutMS=15000,
+            connectTimeoutMS=15000,
+            socketTimeoutMS=15000,
             tls=True,
             tlsCAFile=certifi.where(),
             retryWrites=True,
         )
 
         # Ping the database to verify the connection
-        log.info("Attempting to connect to MongoDB...")
+        log.info("Pinging MongoDB...")
         client.admin.command("ping")
         log.info("MongoDB connection verified with ping.")
+        print("DEBUG: MongoDB Ping Successful")
 
         db = client[db_name]
 

@@ -21,13 +21,14 @@ export function clearAdminToken() {
 
 async function parseJson(res) {
   const text = await res.text();
+  console.log(`API Response from ${res.url} [${res.status}]:`, text.substring(0, 200));
   let data = null;
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
     const isServerDown = res.status === 503 || res.status === 502 || res.status === 500;
     const hint = isServerDown
-      ? " Backend API is unreachable or crashed. Ensure Render backend is active."
+      ? " Backend API is unreachable or crashed. Ensure Render backend is active and MONGO_URI is correct."
       : "";
     console.error(`Non-JSON response from ${res.url}:`, text);
     throw new Error(
@@ -39,6 +40,12 @@ async function parseJson(res) {
   if (!res.ok) {
     const msg =
       (data && (data.error || data.message)) || res.statusText || `Request failed with status ${res.status}`;
+    
+    // Check if it's a 405 error specifically to give a hint
+    if (res.status === 405) {
+      console.error("METHOD NOT ALLOWED: The backend might be missing explicit POST/OPTIONS support for this route.");
+    }
+    
     throw new Error(msg);
   }
   return data;

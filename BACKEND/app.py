@@ -98,13 +98,21 @@ def home():
 @app.get("/api/health")
 def health():
     m = mongo_status()
-    body = {"status": "ok"}
+    body = {"status": "ok", "env": os.getenv("FLASK_ENV", "production")}
     if not m["ok"]:
         body["mongo"] = "disconnected"
-        body["mongo_detail"] = m["detail"]
+        body["mongo_error"] = m["detail"]
+        body["hint"] = "Check MONGO_URI and Atlas IP Allowlist"
     else:
         body["mongo"] = "connected"
         body["database"] = os.getenv("MONGO_DB_NAME", "portfolio")
+    
+    # Check for critical admin env vars (without showing values)
+    body["admin_config"] = {
+        "user_set": bool(os.getenv("ADMIN_USER")),
+        "pass_set": bool(os.getenv("ADMIN_PASS")),
+        "secret_set": bool(os.getenv("SECRET_KEY"))
+    }
     return body
 
 
