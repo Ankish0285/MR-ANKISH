@@ -35,14 +35,12 @@ if not _secret:
 app.config["SECRET_KEY"] = _secret
 
 # Configure CORS for production and development
-# Production: Only allow Vercel frontend
-# Development: Allow localhost
 ALLOWED_ORIGINS = [
     "https://mr-ankish.vercel.app",  # Production Vercel frontend
-    "http://localhost:5173",  # Dev Vite frontend
-    "http://127.0.0.1:5173",  # Dev Vite frontend (localhost IP)
+    "http://localhost:5173",          # Dev Vite frontend
+    "http://127.0.0.1:5173",         # Dev Vite frontend (localhost IP)
 ]
-CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS, "supports_credentials": True}})
+CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS, "supports_credentials": True}, r"/": {"origins": ALLOWED_ORIGINS}})
 
 app.register_blueprint(projects_bp, url_prefix="/api")
 app.register_blueprint(cms_public_bp, url_prefix="/api")
