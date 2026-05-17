@@ -29,20 +29,23 @@ def _load_env_files() -> None:
 _load_env_files()
 
 app = Flask(__name__)
+# Disable strict slashes to prevent 405 on trailing slash mismatch
+app.url_map.strict_slashes = False
+
 _secret = (os.getenv("SECRET_KEY") or "").strip()
 if not _secret:
     _secret = "dev-only-set-SECRET_KEY-in-dotenv"
 app.config["SECRET_KEY"] = _secret
 
 # Configure CORS for production and development
-_origins = os.getenv("ALLOWED_ORIGINS", "https://mr-ankish.vercel.app,http://localhost:5173,http://127.0.0.1:5173").split(",")
+_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 ALLOWED_ORIGINS = [o.strip() for o in _origins if o.strip()]
 
 CORS(app, resources={
     r"/api/*": {
         "origins": ALLOWED_ORIGINS,
         "supports_credentials": True,
-        "allow_headers": ["Content-Type", "Authorization"],
+        "allow_headers": ["Content-Type", "Authorization", "Accept"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
     }
 })

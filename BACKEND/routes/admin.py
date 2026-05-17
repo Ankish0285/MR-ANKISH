@@ -46,8 +46,10 @@ def _normalize_tech_stack(v):
 # --- Auth ---
 
 
-@admin_bp.post("/login")
+@admin_bp.route("/login", methods=["POST", "OPTIONS"])
 def admin_login():
+    if request.method == "OPTIONS":
+        return "", 200
     try:
         data = request.get_json(silent=True) or {}
         username = (data.get("username") or "").strip()
