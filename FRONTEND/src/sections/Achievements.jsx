@@ -1,8 +1,10 @@
+// Normalizing casing to frontend tree
 import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, ExternalLink, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { fetchAchievementsPublic } from "../services/api.js";
 
+// Force consistent casing
 const CATEGORIES = ["All", "Certificate", "Competition", "Project", "Internship"];
 
 export default function Achievements() {

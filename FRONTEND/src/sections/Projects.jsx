@@ -1,3 +1,4 @@
+// Normalizing casing to frontend tree
 import { motion } from "framer-motion";
 import { ExternalLink, RefreshCw } from "lucide-react";
 import { IconGithub } from "../components/SocialIcons.jsx";

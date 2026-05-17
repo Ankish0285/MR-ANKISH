@@ -1,3 +1,4 @@
+// Normalizing casing to frontend tree
 import { motion } from "framer-motion";
 import { Mail, ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";

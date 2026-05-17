@@ -1,3 +1,4 @@
+// Normalizing casing to frontend tree
 import { motion } from "framer-motion";
 import { Code2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -40,6 +41,7 @@ function Bar({ name, levelPct, delay }) {
   );
 }
 
+// Force consistent casing
 export default function Skills() {
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);

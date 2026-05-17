@@ -22,9 +22,9 @@ export default function AdminHome() {
     setLoading(true);
     try {
       const data = await fetchAdminHome();
-      const it = data && data.item;
+      const it = data; // Admin API returns object directly, not wrapped in .item
       setItem(it);
-      if (it) {
+      if (it && it.id) {
         setForm({
           name: it.name || "",
           title: it.title || "",

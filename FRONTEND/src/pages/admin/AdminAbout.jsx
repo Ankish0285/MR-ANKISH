@@ -24,9 +24,9 @@ export default function AdminAbout() {
     setLoading(true);
     try {
       const data = await fetchAdminAbout();
-      const it = data?.item;
+      const it = data; // Admin API returns object directly, not wrapped in .item
       setItem(it);
-      if (it) {
+      if (it && it.id) {
         setForm({
           description: it.description || "",
           resume_link: it.resume_link || "",

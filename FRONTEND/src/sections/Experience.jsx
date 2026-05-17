@@ -1,3 +1,4 @@
+// Normalizing casing to frontend tree
 import { motion } from "framer-motion";
 import { Briefcase } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -54,6 +55,10 @@ export default function Experience() {
 
           {loading ? (
             <p className="py-10 text-center text-slate-500">Loading…</p>
+          ) : null}
+
+          {error ? (
+            <p className="py-10 text-center text-sm text-red-400">{error}</p>
           ) : null}
 
           <div className="space-y-12">

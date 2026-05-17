@@ -1,3 +1,4 @@
+// Normalizing casing to frontend tree
 import { motion } from "framer-motion";
 import { useCallback, useEffect, useState } from "react";
 import { fetchAboutPublic, fetchHomePublic } from "../services/api.js";

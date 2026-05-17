@@ -1,3 +1,4 @@
+// Normalizing casing to frontend tree
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import RequireAuth from "./components/admin/RequireAuth.jsx";
 import PublicSite from "./pages/PublicSite.jsx";
