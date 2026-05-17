@@ -2,7 +2,10 @@
 // Production: Use deployed backend URL from env, Dev: Use relative path with local proxy
 /** @type {any} */
 const meta = import.meta;
-const API_BASE = (meta.env?.VITE_API_URL || "").replace(/\/$/, "");
+// Strip trailing slash AND trailing /api if present to avoid double /api/api calls
+const API_BASE = (meta.env?.VITE_API_URL || "")
+  .replace(/\/$/, "")
+  .replace(/\/api$/, "");
 
 const TOKEN_KEY = "admin_token";
 

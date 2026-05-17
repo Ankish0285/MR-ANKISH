@@ -55,8 +55,9 @@ def admin_login():
         username = (data.get("username") or "").strip()
         password = (data.get("password") or "").strip()
         
-        expected_u = (os.getenv("ADMIN_USER") or "").strip()
-        expected_p = (os.getenv("ADMIN_PASS") or "").strip()
+        # Strip whitespace and quotes that might have been copied from .env
+        expected_u = (os.getenv("ADMIN_USER") or "").strip().strip("'").strip('"')
+        expected_p = (os.getenv("ADMIN_PASS") or "").strip().strip("'").strip('"')
 
         print(f"DEBUG: Login attempt for user '{username}'")
         print(f"DEBUG: Expected user set: {bool(expected_u)}, Expected pass set: {bool(expected_p)}")

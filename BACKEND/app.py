@@ -38,8 +38,9 @@ if not _secret:
 app.config["SECRET_KEY"] = _secret
 
 # Configure CORS for production and development
-_origins = os.getenv("ALLOWED_ORIGINS", "https://mr-ankish.vercel.app").split(",")
-ALLOWED_ORIGINS = [o.strip() for o in _origins if o.strip()]
+_origins_raw = os.getenv("ALLOWED_ORIGINS", "https://mr-ankish.vercel.app").split(",")
+# Strip whitespace and trailing slashes from origins for reliable matching
+ALLOWED_ORIGINS = [o.strip().rstrip("/") for o in _origins_raw if o.strip()]
 
 CORS(app, resources={
     r"/api/*": {
@@ -98,21 +99,37 @@ def home():
 @app.get("/api/health")
 def health():
     m = mongo_status()
-    body = {"status": "ok", "env": os.getenv("FLASK_ENV", "production")}
+    db_name = os.getenv("MONGO_DB_NAME", "portfolio")
+    body = {
+        "status": "ok",
+        "env": os.getenv("FLASK_ENV", "production"),
+        "database_target": db_name
+    }
+    
     if not m["ok"]:
         body["mongo"] = "disconnected"
         body["mongo_error"] = m["detail"]
-        body["hint"] = "Check MONGO_URI and Atlas IP Allowlist"
     else:
         body["mongo"] = "connected"
-        body["database"] = os.getenv("MONGO_DB_NAME", "portfolio")
+        try:
+            from models.db import _db, _client
+            if _db is not None:
+                collections = _db.list_collection_names()
+                body["collections"] = collections
+                body["counts"] = {name: _db[name].count_documents({}) for name in collections}
+            
+            if _client is not None:
+                # List all databases to see if the user is in the wrong one
+                body["available_databases"] = _client.list_database_names()
+        except Exception as e:
+            body["diag_error"] = str(e)
     
-    # Check for critical admin env vars (without showing values)
     body["admin_config"] = {
         "user_set": bool(os.getenv("ADMIN_USER")),
         "pass_set": bool(os.getenv("ADMIN_PASS")),
         "secret_set": bool(os.getenv("SECRET_KEY"))
     }
+    body["cors_allowed"] = ALLOWED_ORIGINS
     return body
 
 
