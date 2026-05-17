@@ -101,54 +101,8 @@ def health():
         body["mongo_detail"] = m["detail"]
     else:
         body["mongo"] = "connected"
+        body["database"] = os.getenv("MONGO_DB_NAME", "portfolio")
     return body
-
-
-@app.route("/api/projects")
-def get_projects():
-    """
-    Returns the list of portfolio projects. 
-    Compatible with frontend fetchProjects logic.
-    """
-    return jsonify({
-        "success": True,
-        "projects": [
-            {
-                "title": "AI Internship Recommendation System",
-                "description": "An AI-powered platform that recommends internships based on student skills and preferences using machine learning.",
-                "tech": ["Python", "Flask", "Scikit-Learn", "MongoDB"]
-            },
-            {
-                "title": "Full Stack Portfolio Website",
-                "description": "A professional portfolio with a custom Admin Dashboard to manage projects, skills, and messages in real-time.",
-                "tech": ["React", "Flask", "MongoDB", "Tailwind CSS"]
-            },
-            {
-                "title": "YouTube Content Automation",
-                "description": "Tools and scripts for automating YouTube content creation and analytics tracking.",
-                "tech": ["Python", "YouTube API", "Automation"]
-            }
-        ]
-    })
-
-
-@app.route("/api/skills")
-def get_skills():
-    """
-    Returns the list of skills. 
-    Returns an array of objects for frontend compatibility (id, name, level).
-    """
-    return jsonify([
-        {"id": "1", "name": "Python", "level": "Advanced"},
-        {"id": "2", "name": "Flask", "level": "Advanced"},
-        {"id": "3", "name": "MongoDB", "level": "Intermediate"},
-        {"id": "4", "name": "React", "level": "Advanced"},
-        {"id": "5", "name": "AI/ML", "level": "Intermediate"},
-        {"id": "6", "name": "Full Stack Development", "level": "Advanced"},
-        {"id": "7", "name": "Web Development", "level": "Advanced"},
-        {"id": "8", "name": "YouTube Creator", "level": "Intermediate"},
-        {"id": "9", "name": "Admin Dashboard", "level": "Advanced"}
-    ])
 
 
 if __name__ == "__main__":

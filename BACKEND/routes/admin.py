@@ -52,19 +52,28 @@ def admin_login():
         data = request.get_json(silent=True) or {}
         username = (data.get("username") or "").strip()
         password = (data.get("password") or "").strip()
+        
         expected_u = (os.getenv("ADMIN_USER") or "").strip()
         expected_p = (os.getenv("ADMIN_PASS") or "").strip()
+
+        current_app.logger.info(f"Login attempt received for user: {username}")
+
         if not expected_u or not expected_p:
+            current_app.logger.error("Login failed: ADMIN_USER or ADMIN_PASS environment variables are missing!")
             return (
                 jsonify(
                     {
-                        "error": "Admin credentials not configured. Set ADMIN_USER and ADMIN_PASS in .env",
+                        "error": "Admin credentials not configured on the server. Please set ADMIN_USER and ADMIN_PASS in Render settings.",
                     }
                 ),
                 503,
             )
+        
         if username != expected_u or password != expected_p:
+            current_app.logger.warning(f"Login failed for user {username}: Invalid credentials")
             return jsonify({"error": "Invalid username or password"}), 401
+        
+        current_app.logger.info(f"Login successful for user: {username}")
         token = create_admin_jwt()
         return jsonify({"ok": True, "token": token})
     except RuntimeError as e:

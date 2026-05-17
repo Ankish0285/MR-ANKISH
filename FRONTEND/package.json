@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "concurrently -k -n API,WEB -c yellow,cyan \"npm run dev:api\" \"npm run dev:web\"",
     "dev:vite": "vite",
-    "dev:api": "node ../BACKEND/scripts/start-backend.mjs",
-    "dev:web": "wait-on -t 120000 http://127.0.0.1:5000/api/health && vite",
+    "dev:api": "python ../BACKEND/app.py",
+    "dev:web": "vite",
     "dev:full": "npm run dev",
     "start": "npm run dev",
     "setup:backend": "node ../BACKEND/scripts/ensure-backend-deps.mjs",
