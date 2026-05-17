@@ -278,7 +278,7 @@ export async function deleteAdminExperience(id) {
   return parseJson(res);
 }
 
-// Admin Achievements
+// Admin Achievements (Blog)
 export async function fetchAdminAchievements() {
   const res = await fetch(`${API_BASE}/api/admin/achievements`, { headers: authHeaders() });
   return parseJson(res);
@@ -296,36 +296,6 @@ export async function deleteAdminAchievement(id) {
   return parseJson(res);
 }
 
-// Admin Content Creator
-export async function fetchAdminContentCreator() {
-  const res = await fetch(`${API_BASE}/api/admin/content-creator`, { headers: authHeaders() });
-  return parseJson(res);
-}
-export async function saveAdminContentCreator(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/content-creator`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
-}
-
-// Admin Site Settings
-export async function fetchAdminSiteSettings() {
-  const res = await fetch(`${API_BASE}/api/admin/site-settings`, { headers: authHeaders() });
-  return parseJson(res);
-}
-export async function saveAdminSiteSettings(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/site-settings`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
-}
-
-// Admin Contact Settings
-export async function fetchAdminContactSettings() {
-  const res = await fetch(`${API_BASE}/api/admin/contact-settings`, { headers: authHeaders() });
-  return parseJson(res);
-}
-export async function saveAdminContactSettings(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/contact-settings`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
-}
-
 // Admin Messages
 export async function fetchAdminMessages() {
   const res = await fetch(`${API_BASE}/api/admin/messages`, { headers: authHeaders() });
@@ -336,14 +306,31 @@ export async function deleteAdminMessage(id) {
   return parseJson(res);
 }
 
-// Admin Upload
-export async function adminUploadImage(file) {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch(`${API_BASE}/api/admin/upload`, {
-    method: "POST",
-    headers: authHeaders(false), // FormData handles Content-Type automatically
-    body: formData,
-  });
+// Admin Content Creator
+export async function fetchAdminContentCreator() {
+  const res = await fetch(`${API_BASE}/api/admin/content-creator`, { headers: authHeaders() });
+  return parseJson(res);
+}
+export async function updateAdminContentCreator(payload) {
+  const res = await fetch(`${API_BASE}/api/admin/content-creator`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
+  return parseJson(res);
+}
+
+// Admin Settings
+export async function fetchAdminSiteSettings() {
+  const res = await fetch(`${API_BASE}/api/admin/site-settings`, { headers: authHeaders() });
+  return parseJson(res);
+}
+export async function updateAdminSiteSettings(payload) {
+  const res = await fetch(`${API_BASE}/api/admin/site-settings`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
+  return parseJson(res);
+}
+
+export async function fetchAdminContactSettings() {
+  const res = await fetch(`${API_BASE}/api/admin/contact-settings`, { headers: authHeaders() });
+  return parseJson(res);
+}
+export async function updateAdminContactSettings(payload) {
+  const res = await fetch(`${API_BASE}/api/admin/contact-settings`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
   return parseJson(res);
 }
