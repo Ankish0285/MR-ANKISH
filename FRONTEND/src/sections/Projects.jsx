@@ -98,10 +98,7 @@ export default function Projects() {
       const data = await fetchProjects();
       setProjects(data);
     } catch (e) {
-      if (e.message !== "Network error — from FRONTEND run npm run dev (API + site), or start Flask in BACKEND." && 
-          !e.message.includes("Unexpected token")) {
-        setError(e.message || "Failed to load projects");
-      }
+      setError(e.message || "Failed to load projects. Please ensure the backend is running.");
     } finally {
       setLoading(false);
     }
@@ -133,14 +130,6 @@ export default function Projects() {
             className="mx-auto mt-10 max-w-xl rounded-2xl border border-orange-500/25 bg-slate-900/60 p-6 text-center shadow-lg"
           >
             <p className="text-sm text-red-300/95">{error}</p>
-            <p className="mt-3 text-xs text-slate-500">
-              First time: in <code className="text-orange-400/90">FRONTEND</code> run{" "}
-              <code className="rounded bg-slate-800 px-1.5 py-0.5 text-orange-300">npm run setup:backend</code>{" "}
-              (installs pymongo into <code className="text-slate-400">.venv</code>). Then{" "}
-              <code className="rounded bg-slate-800 px-1.5 py-0.5 text-orange-300">npm run dev</code>{" "}
-              (starts API + site). Frontend only:{" "}
-              <code className="rounded bg-slate-800 px-1.5 py-0.5 text-slate-400">npm run dev:vite</code>.
-            </p>
             <motion.button
               type="button"
               whileHover={{ scale: 1.02 }}

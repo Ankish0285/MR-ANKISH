@@ -17,10 +17,7 @@ export function SiteSettingsProvider({ children }) {
       const v = await fetchSiteSettings();
       setVisibility(v || {});
     } catch (e) {
-      if (e.message !== "Network error — from FRONTEND run npm run dev (API + site), or start Flask in BACKEND." && 
-          !e.message?.includes("Unexpected token")) {
-        console.error("Failed to fetch site settings", e);
-      }
+      console.error("Failed to fetch site settings", e);
       setVisibility({});
     } finally {
       setLoading(false);

@@ -52,10 +52,7 @@ export default function Skills() {
       const data = await fetchSkillsPublic();
       setSkills(Array.isArray(data) ? data : []);
     } catch (e) {
-      if (e.message !== "Network error — from FRONTEND run npm run dev (API + site), or start Flask in BACKEND." && 
-          !e.message.includes("Unexpected token")) {
-        setError(e.message || "Failed to load skills");
-      }
+      setError(e.message || "Failed to load skills. Please ensure the backend is running.");
       setSkills([]);
     } finally {
       setLoading(false);

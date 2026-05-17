@@ -15,10 +15,7 @@ export default function Experience() {
       const data = await fetchExperiencePublic();
       setItems(Array.isArray(data) ? data : []);
     } catch (e) {
-      if (e.message !== "Network error — from FRONTEND run npm run dev (API + site), or start Flask in BACKEND." && 
-          !e.message.includes("Unexpected token")) {
-        setError(e.message || "Failed to load experience");
-      }
+      setError(e.message || "Failed to load experience. Please ensure the backend is running.");
       setItems([]);
     } finally {
       setLoading(false);

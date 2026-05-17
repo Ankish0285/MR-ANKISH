@@ -26,10 +26,7 @@ function useContactDisplay() {
       const raw = await fetchContactSettingsPublic();
       setData(raw);
     } catch (e) {
-      if (e.message !== "Network error — from FRONTEND run npm run dev (API + site), or start Flask in BACKEND." && 
-          !e.message?.includes("Unexpected token")) {
-        console.error("Failed to load contact settings", e);
-      }
+      console.error("Failed to load contact settings", e);
       setData(null);
     } finally {
       setLoading(false);
