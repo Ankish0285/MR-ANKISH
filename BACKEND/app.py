@@ -127,12 +127,18 @@ def get_projects():
 def get_skills():
     """
     Returns the list of skills. 
-    Returns an array directly to ensure compatibility with frontend fetchSkillsPublic logic.
+    Returns an array of objects for frontend compatibility (id, name, level).
     """
     return jsonify([
-        "Python", "Flask", "MongoDB", "React", 
-        "AI/ML", "Full Stack Development", "Web Development",
-        "YouTube Creator", "Admin Dashboard"
+        {"id": "1", "name": "Python", "level": "Advanced"},
+        {"id": "2", "name": "Flask", "level": "Advanced"},
+        {"id": "3", "name": "MongoDB", "level": "Intermediate"},
+        {"id": "4", "name": "React", "level": "Advanced"},
+        {"id": "5", "name": "AI/ML", "level": "Intermediate"},
+        {"id": "6", "name": "Full Stack Development", "level": "Advanced"},
+        {"id": "7", "name": "Web Development", "level": "Advanced"},
+        {"id": "8", "name": "YouTube Creator", "level": "Intermediate"},
+        {"id": "9", "name": "Admin Dashboard", "level": "Advanced"}
     ])
 
 
