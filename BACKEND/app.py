@@ -95,6 +95,47 @@ def health():
     return body
 
 
+@app.route("/api/projects")
+def get_projects():
+    """
+    Returns the list of portfolio projects. 
+    Compatible with frontend fetchProjects logic.
+    """
+    return jsonify({
+        "success": True,
+        "projects": [
+            {
+                "title": "AI Internship Recommendation System",
+                "description": "An AI-powered platform that recommends internships based on student skills and preferences using machine learning.",
+                "tech": ["Python", "Flask", "Scikit-Learn", "MongoDB"]
+            },
+            {
+                "title": "Full Stack Portfolio Website",
+                "description": "A professional portfolio with a custom Admin Dashboard to manage projects, skills, and messages in real-time.",
+                "tech": ["React", "Flask", "MongoDB", "Tailwind CSS"]
+            },
+            {
+                "title": "YouTube Content Automation",
+                "description": "Tools and scripts for automating YouTube content creation and analytics tracking.",
+                "tech": ["Python", "YouTube API", "Automation"]
+            }
+        ]
+    })
+
+
+@app.route("/api/skills")
+def get_skills():
+    """
+    Returns the list of skills. 
+    Returns an array directly to ensure compatibility with frontend fetchSkillsPublic logic.
+    """
+    return jsonify([
+        "Python", "Flask", "MongoDB", "React", 
+        "AI/ML", "Full Stack Development", "Web Development",
+        "YouTube Creator", "Admin Dashboard"
+    ])
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
