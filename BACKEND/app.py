@@ -35,12 +35,17 @@ if not _secret:
 app.config["SECRET_KEY"] = _secret
 
 # Configure CORS for production and development
-ALLOWED_ORIGINS = [
-    "https://mr-ankish.vercel.app",  # Production Vercel frontend
-    "http://localhost:5173",          # Dev Vite frontend
-    "http://127.0.0.1:5173",         # Dev Vite frontend (localhost IP)
-]
-CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS, "supports_credentials": True}, r"/": {"origins": ALLOWED_ORIGINS}})
+_origins = os.getenv("ALLOWED_ORIGINS", "https://mr-ankish.vercel.app,http://localhost:5173,http://127.0.0.1:5173").split(",")
+ALLOWED_ORIGINS = [o.strip() for o in _origins if o.strip()]
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ALLOWED_ORIGINS,
+        "supports_credentials": True,
+        "allow_headers": ["Content-Type", "Authorization"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    }
+})
 
 app.register_blueprint(projects_bp, url_prefix="/api")
 app.register_blueprint(cms_public_bp, url_prefix="/api")
@@ -53,23 +58,29 @@ init_db()
 @app.errorhandler(Exception)
 def _api_json_errors(exc):
     """Return JSON (not HTML) for API routes so the React app can show the real error."""
-    if isinstance(exc, DatabaseUnavailable):
-        if request.path.startswith("/api"):
-            return jsonify({"error": str(exc)}), 503
-        raise exc
-    if isinstance(exc, HTTPException):
-        if request.path.startswith("/api"):
-            return jsonify({"error": exc.description or exc.name}), exc.code
-        raise exc
-    if request.path.startswith("/api"):
-        import traceback
+    import traceback
+    
+    status_code = 500
+    message = "Internal server error"
+    detail = None
 
-        detail = traceback.format_exc()
-        app.logger.error("Unhandled API error:\n%s", detail)
-        payload = {"error": "Internal server error"}
+    if isinstance(exc, DatabaseUnavailable):
+        status_code = 503
+        message = str(exc)
+    elif isinstance(exc, HTTPException):
+        status_code = exc.code
+        message = exc.description or exc.name
+    else:
+        app.logger.error("Unhandled API error:\n%s", traceback.format_exc())
         if app.debug:
-            payload["detail"] = str(exc)
-        return jsonify(payload), 500
+            detail = str(exc)
+
+    if request.path.startswith("/api"):
+        payload = {"error": message, "success": False}
+        if detail:
+            payload["detail"] = detail
+        return jsonify(payload), status_code
+    
     raise exc
 
 

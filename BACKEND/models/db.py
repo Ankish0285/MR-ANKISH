@@ -68,16 +68,18 @@ def init_db() -> None:
         # Uses certifi for TLS/SSL certificates and sets appropriate timeouts
         client = MongoClient(
             uri,
-            serverSelectionTimeoutMS=20000,
-            connectTimeoutMS=20000,
+            serverSelectionTimeoutMS=10000,  # 10 seconds to find server
+            connectTimeoutMS=10000,         # 10 seconds to connect
+            socketTimeoutMS=10000,
             tls=True,
             tlsCAFile=certifi.where(),
+            retryWrites=True,
         )
 
         # Ping the database to verify the connection
-        log.info("Pinging MongoDB...")
+        log.info("Attempting to connect to MongoDB...")
         client.admin.command("ping")
-        log.info("MongoDB ping successful.")
+        log.info("MongoDB connection verified with ping.")
 
         db = client[db_name]
 

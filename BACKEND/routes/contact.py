@@ -32,6 +32,12 @@ def save_contact():
     }
     db.contacts.insert_one(doc)
 
-    send_contact_email(name=name, email=email, message=message)
+    try:
+        send_contact_email(name=name, email=email, message=message)
+    except Exception as e:
+        # We don't want to fail the whole request if only the email notification fails
+        # since the message is already saved in the database.
+        from flask import current_app
+        current_app.logger.warning("Failed to send contact email: %s", str(e))
 
     return jsonify({"message": "Thanks! Your message was received."}), 201

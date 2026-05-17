@@ -27,17 +27,18 @@ async function parseJson(res) {
   } catch {
     const isServerDown = res.status === 503 || res.status === 502 || res.status === 500;
     const hint = isServerDown
-      ? " Backend API is unreachable. Ensure Render backend is running."
+      ? " Backend API is unreachable or crashed. Ensure Render backend is active."
       : "";
+    console.error(`Non-JSON response from ${res.url}:`, text);
     throw new Error(
       text?.trim()
-        ? `Server returned non-JSON (${res.status}).${hint}`
-        : `Bad response (${res.status} ${res.statusText}).${hint}`
+        ? `Server error (${res.status}): ${text.substring(0, 100)}${hint}`
+        : `Empty or bad response (${res.status}).${hint}`
     );
   }
   if (!res.ok) {
     const msg =
-      (data && (data.error || data.message)) || res.statusText || "Request failed";
+      (data && (data.error || data.message)) || res.statusText || `Request failed with status ${res.status}`;
     throw new Error(msg);
   }
   return data;
@@ -147,6 +148,7 @@ export async function fetchContactSettingsPublic() {
 }
 
 export async function submitContact(payload) {
+  console.log("Submitting contact form to:", `${API_BASE}/api/contact`);
   const res = await fetch(`${API_BASE}/api/contact`, {
     method: "POST",
     headers: authHeaders(),
@@ -162,13 +164,17 @@ export async function sendContact(payload) {
 // --- ADMIN APIs ---
 
 export async function adminLogin(username, password) {
+  console.log("Attempting admin login to:", `${API_BASE}/api/admin/login`);
   const res = await fetch(`${API_BASE}/api/admin/login`, {
     method: "POST",
     headers: authHeaders(),
     body: JSON.stringify({ username, password }),
   });
   const data = await parseJson(res);
-  if (data && data.token) setAdminToken(data.token);
+  if (data && data.token) {
+    console.log("Login successful, token received.");
+    setAdminToken(data.token);
+  }
   return data;
 }
 
