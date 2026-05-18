@@ -1,51 +1,81 @@
-# MR ANKISH
+# 🚀 MR ANKISH — AI/ML Portfolio Website
 
-Frontend (`client/`) and backend (`server/`) with SQLite. Vite dev server proxies `/api` to the Python app.
+A full-stack personal portfolio project built for a B.Tech CSE (AI & ML) student to showcase skills, projects, achievements, and technical experience professionally.
 
-## Layout
+This portfolio is designed with a modern UI, responsive frontend, secure backend APIs, and SQLite database integration. It includes project management, contact handling, API architecture, and deployment-ready structure.
 
-- `client/` — React + Vite
-- `server/` — Flask app and `server/database/` (SQLite file `site.db` is created on first run)
-- `.env` — optional secrets and mail settings at the project root
+---
 
-**Note:** `client/index.html` must sit next to `vite.config.js`. Static files go in `client/public/`.
+## 📌 Features
 
-## Prerequisites
+- ⚡ Modern React + Vite frontend
+- 🔥 Flask backend with REST APIs
+- 🗄️ SQLite database integration
+- 📱 Fully responsive portfolio UI
+- 📬 Contact form with database storage
+- 🌐 API communication using Axios
+- 🔒 Environment-based configuration
+- 🚀 Production-ready structure
+- 🎨 Clean developer-friendly codebase
+  
+---
 
-- Node.js 18+
-- Python 3.10+
+# 📂 Project Structure
+[PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
 
-## Backend
+---
 
-```bash
-cd server
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python app.py
-```
+# 🔗 API Endpoints
 
-API base: `http://127.0.0.1:5000` — `GET /api/projects`, `POST /api/contact`, `GET /api/health`.
+| Method | Endpoint | Description |
+|--------|-----------|-------------|
+| GET | `/api/health` | Health Check |
+| GET | `/api/projects` | Fetch Projects |
+| POST | `/api/contact` | Submit Contact Form |
 
-## Frontend
 
-```bash
-cd client
-npm install
-npm run dev
-```
+---
 
-Open `http://localhost:5173`.
+# 🧠 Portfolio Sections
 
-## Environment
+- Home
+- About Me
+- Skills
+- Projects
+- Experience
+- Education
+- Contact
 
-Edit `.env` for `SECRET_KEY` and optional SMTP (`MAIL_SERVER`, `MAIL_USERNAME`, etc.). If mail is not configured, contact messages are still stored in the database.
+---
 
-## Production build
 
-```bash
-cd client
-npm run build
-```
+You can deploy:
+- Frontend → Vercel
+- Backend → Render
+---
 
-Serve `client/dist/` and run the backend behind your host or reverse proxy as you prefer.
+# 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+# 👨‍💻 Developer
+
+**ANKISH**  
+B.Tech CSE (AI & ML) Student  
+Passionate about AI, Full Stack Development, and Modern Web Technologies.
+
+---
+
+# ⭐ Support
+
+If you like this project:
+
+- Give it a ⭐ on GitHub
+- Share it with others
+- Follow for more projects
+
+---
+
+> “Code. Learn. Build. Repeat.” 🚀
