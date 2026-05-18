@@ -38,18 +38,11 @@ if not _secret:
 app.config["SECRET_KEY"] = _secret
 
 # Configure CORS for production and development
-_origins_raw = os.getenv("ALLOWED_ORIGINS", "https://mr-ankish.vercel.app").split(",")
-# Strip whitespace, trailing slashes, AND backticks/quotes for reliable matching
-ALLOWED_ORIGINS = [o.strip().rstrip("/").strip("`").strip("'").strip('"') for o in _origins_raw if o.strip()]
-
-CORS(app, resources={
-    r"/api/*": {
-        "origins": ALLOWED_ORIGINS,
-        "supports_credentials": True,
-        "allow_headers": ["Content-Type", "Authorization", "Accept"],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    }
-})
+CORS(
+    app,
+    origins=os.getenv("ALLOWED_ORIGINS", "").split(","),
+    supports_credentials=True
+)
 
 app.register_blueprint(projects_bp, url_prefix="/api")
 app.register_blueprint(cms_public_bp, url_prefix="/api")
