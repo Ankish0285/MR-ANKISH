@@ -85,8 +85,14 @@ def _api_json_errors(exc):
         if detail:
             payload["detail"] = detail
         return jsonify(payload), status_code
-    
-    raise exc
+
+    if isinstance(exc, HTTPException):
+        return exc
+
+    payload = {"error": message, "success": False}
+    if detail:
+        payload["detail"] = detail
+    return jsonify(payload), status_code
 
 
 @app.route("/")
