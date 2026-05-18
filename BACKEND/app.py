@@ -80,13 +80,17 @@ def _api_json_errors(exc):
         if app.debug:
             detail = str(exc)
 
+    payload = {"error": message, "success": False}
+    if detail:
+        payload["detail"] = detail
+
     if request.path.startswith("/api"):
-        payload = {"error": message, "success": False}
-        if detail:
-            payload["detail"] = detail
         return jsonify(payload), status_code
-    
-    raise exc
+
+    if isinstance(exc, HTTPException):
+        return exc
+
+    return jsonify(payload), status_code
 
 
 @app.route("/")
