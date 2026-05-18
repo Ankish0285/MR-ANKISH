@@ -1,11 +1,7 @@
-// Normalizing casing to frontend tree
-// Production: Use deployed backend URL from env, Dev: Use relative path with local proxy
-/** @type {any} */
-const meta = import.meta;
-// Strip trailing slash AND trailing /api if present to avoid double /api/api calls
-const API_BASE = (meta.env?.VITE_API_URL || "")
-  .replace(/\/$/, "")
-  .replace(/\/api$/, "");
+import axios from "axios";
+
+// Production: Use deployed backend URL from env, Dev: Use local proxy
+const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
 
 const TOKEN_KEY = "admin_token";
 
@@ -22,133 +18,116 @@ export function clearAdminToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-async function parseJson(res) {
-  const text = await res.text();
-  console.log(`API Response from ${res.url} [${res.status}]:`, text.substring(0, 200));
-  let data = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    const isServerDown = res.status === 503 || res.status === 502 || res.status === 500;
-    const hint = isServerDown
-      ? " Backend API is unreachable or crashed. Ensure Render backend is active and MONGO_URI is correct."
-      : "";
-    console.error(`Non-JSON response from ${res.url}:`, text);
-    throw new Error(
-      text?.trim()
-        ? `Server error (${res.status}): ${text.substring(0, 100)}${hint}`
-        : `Empty or bad response (${res.status}).${hint}`
-    );
-  }
-  if (!res.ok) {
-    const msg =
-      (data && (data.error || data.message)) || res.statusText || `Request failed with status ${res.status}`;
-    
-    // Check if it's a 405 error specifically to give a hint
-    if (res.status === 405) {
-      console.error("METHOD NOT ALLOWED: The backend might be missing explicit POST/OPTIONS support for this route.");
-    }
-    
-    throw new Error(msg);
-  }
-  return data;
-}
+// Create Axios instance
+const API = axios.create({
+  baseURL: API_BASE,
+  withCredentials: true,
+});
 
-function authHeaders(json = true) {
+// Request interceptor for auth
+API.interceptors.request.use((config) => {
   const token = getAdminToken();
-  /** @type {Record<string, string>} */
-  const h = {};
-  if (json) h["Content-Type"] = "application/json";
-  if (token) h.Authorization = `Bearer ${token}`;
-  return h;
-}
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor for error handling
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const res = error.response;
+    const isServerDown = !res || res.status === 503 || res.status === 502 || res.status === 500;
+    const hint = isServerDown
+      ? " Backend API is unreachable. Ensure Render backend is running."
+      : "";
+    
+    const msg = (res?.data?.error || res?.data?.message) || error.message || "Request failed";
+    console.error(`API Error [${res?.status}]:`, msg, hint);
+    
+    return Promise.reject(new Error(msg + hint));
+  }
+);
+
+// Helper for mapping ID (ensuring item.id is used)
+const mapId = (item) => ({
+  ...item,
+  id: item.id || item._id,
+});
 
 // --- PUBLIC APIs ---
 
 export async function fetchProjects() {
   try {
-    const res = await fetch(`${API_BASE}/api/projects`);
-    const data = await parseJson(res);
-    return data && data.projects ? data.projects : [];
+    const res = await API.get("/projects");
+    const data = res.data;
+    const projects = data && data.projects ? data.projects : [];
+    return projects.map(mapId);
   } catch (error) {
-    console.error("fetchProjects error:", error);
     return [];
   }
 }
 
 export async function fetchSkillsPublic() {
   try {
-    const res = await fetch(`${API_BASE}/api/skills`);
-    const data = await parseJson(res);
-    return Array.isArray(data) ? data : [];
+    const res = await API.get("/skills");
+    return Array.isArray(res.data) ? res.data.map(mapId) : [];
   } catch (error) {
-    console.error("fetchSkillsPublic error:", error);
     return [];
   }
 }
 
 export async function fetchHomePublic() {
   try {
-    const res = await fetch(`${API_BASE}/api/home`);
-    const data = await parseJson(res);
-    return data && data.item ? data.item : null;
+    const res = await API.get("/home");
+    return res.data && res.data.item ? mapId(res.data.item) : null;
   } catch (error) {
-    console.error("fetchHomePublic error:", error);
     return null;
   }
 }
 
 export async function fetchAboutPublic() {
   try {
-    const res = await fetch(`${API_BASE}/api/about`);
-    const data = await parseJson(res);
-    return data && data.item ? data.item : null;
+    const res = await API.get("/about");
+    return res.data && res.data.item ? mapId(res.data.item) : null;
   } catch (error) {
-    console.error("fetchAboutPublic error:", error);
     return null;
   }
 }
 
 export async function fetchExperiencePublic() {
   try {
-    const res = await fetch(`${API_BASE}/api/experience`);
-    const data = await parseJson(res);
-    return Array.isArray(data) ? data : [];
+    const res = await API.get("/experience");
+    return Array.isArray(res.data) ? res.data.map(mapId) : [];
   } catch (error) {
-    console.error("fetchExperiencePublic error:", error);
     return [];
   }
 }
 
 export async function fetchAchievementsPublic() {
   try {
-    const res = await fetch(`${API_BASE}/api/achievements`);
-    const data = await parseJson(res);
-    return Array.isArray(data) ? data : [];
+    const res = await API.get("/achievements");
+    return Array.isArray(res.data) ? res.data.map(mapId) : [];
   } catch (error) {
-    console.error("fetchAchievementsPublic error:", error);
     return [];
   }
 }
 
 export async function fetchContentCreatorPublic() {
   try {
-    const res = await fetch(`${API_BASE}/api/content-creator`);
-    const data = await parseJson(res);
-    return data || null;
+    const res = await API.get("/content-creator");
+    return res.data ? mapId(res.data) : null;
   } catch (error) {
-    console.error("fetchContentCreatorPublic error:", error);
     return null;
   }
 }
 
 export async function fetchSiteSettings() {
   try {
-    const res = await fetch(`${API_BASE}/api/site-settings`);
-    const data = await parseJson(res);
-    return data || {};
+    const res = await API.get("/site-settings");
+    return res.data ? mapId(res.data) : {};
   } catch (error) {
-    console.error("fetchSiteSettings error:", error);
     return {};
   }
 }
@@ -158,13 +137,8 @@ export async function fetchContactSettingsPublic() {
 }
 
 export async function submitContact(payload) {
-  console.log("Submitting contact form to:", `${API_BASE}/api/contact`);
-  const res = await fetch(`${API_BASE}/api/contact`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify(payload),
-  });
-  return parseJson(res);
+  const res = await API.post("/contact", payload);
+  return res.data;
 }
 
 export async function sendContact(payload) {
@@ -174,163 +148,157 @@ export async function sendContact(payload) {
 // --- ADMIN APIs ---
 
 export async function adminLogin(username, password) {
-  console.log("Attempting admin login to:", `${API_BASE}/api/admin/login`);
-  const res = await fetch(`${API_BASE}/api/admin/login`, {
-    method: "POST",
-    headers: authHeaders(),
-    body: JSON.stringify({ username, password }),
-  });
-  const data = await parseJson(res);
-  if (data && data.token) {
-    console.log("Login successful, token received.");
-    setAdminToken(data.token);
-  }
+  const res = await API.post("/admin/login", { username, password });
+  const data = res.data;
+  if (data && data.token) setAdminToken(data.token);
   return data;
 }
 
 // Admin Home
 export async function fetchAdminHome() {
-  const res = await fetch(`${API_BASE}/api/admin/home`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/home");
+  return res.data;
 }
 export async function createAdminHome(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/home`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/home", payload);
+  return res.data;
 }
 export async function updateAdminHome(id, payload) {
-  const res = await fetch(`${API_BASE}/api/admin/home/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.put(`/admin/home/${id}`, payload);
+  return res.data;
 }
 export async function deleteAdminHome(id) {
-  const res = await fetch(`${API_BASE}/api/admin/home/${id}`, { method: "DELETE", headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.delete(`/admin/home/${id}`);
+  return res.data;
 }
 
 // Admin About
 export async function fetchAdminAbout() {
-  const res = await fetch(`${API_BASE}/api/admin/about`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/about");
+  return res.data;
 }
 export async function createAdminAbout(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/about`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/about", payload);
+  return res.data;
 }
 export async function updateAdminAbout(id, payload) {
-  const res = await fetch(`${API_BASE}/api/admin/about/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.put(`/admin/about/${id}`, payload);
+  return res.data;
 }
 export async function deleteAdminAbout(id) {
-  const res = await fetch(`${API_BASE}/api/admin/about/${id}`, { method: "DELETE", headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.delete(`/admin/about/${id}`);
+  return res.data;
 }
 
 // Admin Skills
 export async function fetchAdminSkills() {
-  const res = await fetch(`${API_BASE}/api/admin/skills`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/skills");
+  return res.data;
 }
 export async function createAdminSkill(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/skills`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/skills", payload);
+  return res.data;
 }
 export async function updateAdminSkill(id, payload) {
-  const res = await fetch(`${API_BASE}/api/admin/skills/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.put(`/admin/skills/${id}`, payload);
+  return res.data;
 }
 export async function deleteAdminSkill(id) {
-  const res = await fetch(`${API_BASE}/api/admin/skills/${id}`, { method: "DELETE", headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.delete(`/admin/skills/${id}`);
+  return res.data;
 }
 
 // Admin Projects
 export async function fetchAdminProjects() {
-  const res = await fetch(`${API_BASE}/api/admin/projects`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/projects");
+  return res.data;
 }
 export async function createAdminProject(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/projects`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/projects", payload);
+  return res.data;
 }
 export async function updateAdminProject(id, payload) {
-  const res = await fetch(`${API_BASE}/api/admin/projects/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.put(`/admin/projects/${id}`, payload);
+  return res.data;
 }
 export async function deleteAdminProject(id) {
-  const res = await fetch(`${API_BASE}/api/admin/projects/${id}`, { method: "DELETE", headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.delete(`/admin/projects/${id}`);
+  return res.data;
 }
 
 // Admin Experience
 export async function fetchAdminExperience() {
-  const res = await fetch(`${API_BASE}/api/admin/experience`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/experience");
+  return res.data;
 }
 export async function createAdminExperience(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/experience`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/experience", payload);
+  return res.data;
 }
 export async function updateAdminExperience(id, payload) {
-  const res = await fetch(`${API_BASE}/api/admin/experience/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.put(`/admin/experience/${id}`, payload);
+  return res.data;
 }
 export async function deleteAdminExperience(id) {
-  const res = await fetch(`${API_BASE}/api/admin/experience/${id}`, { method: "DELETE", headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.delete(`/admin/experience/${id}`);
+  return res.data;
 }
 
 // Admin Achievements (Blog)
 export async function fetchAdminAchievements() {
-  const res = await fetch(`${API_BASE}/api/admin/achievements`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/achievements");
+  return res.data;
 }
 export async function createAdminAchievement(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/achievements`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/achievements", payload);
+  return res.data;
 }
 export async function updateAdminAchievement(id, payload) {
-  const res = await fetch(`${API_BASE}/api/admin/achievements/${id}`, { method: "PUT", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.put(`/admin/achievements/${id}`, payload);
+  return res.data;
 }
 export async function deleteAdminAchievement(id) {
-  const res = await fetch(`${API_BASE}/api/admin/achievements/${id}`, { method: "DELETE", headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.delete(`/admin/achievements/${id}`);
+  return res.data;
 }
 
 // Admin Messages
 export async function fetchAdminMessages() {
-  const res = await fetch(`${API_BASE}/api/admin/messages`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/messages");
+  return res.data;
 }
 export async function deleteAdminMessage(id) {
-  const res = await fetch(`${API_BASE}/api/admin/message/${id}`, { method: "DELETE", headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.delete(`/admin/message/${id}`);
+  return res.data;
 }
 
 // Admin Content Creator
 export async function fetchAdminContentCreator() {
-  const res = await fetch(`${API_BASE}/api/admin/content-creator`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/content-creator");
+  return res.data;
 }
 export async function updateAdminContentCreator(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/content-creator`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/content-creator", payload);
+  return res.data;
 }
 
 // Admin Settings
 export async function fetchAdminSiteSettings() {
-  const res = await fetch(`${API_BASE}/api/admin/site-settings`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/site-settings");
+  return res.data;
 }
 export async function updateAdminSiteSettings(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/site-settings`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/site-settings", payload);
+  return res.data;
 }
 
 export async function fetchAdminContactSettings() {
-  const res = await fetch(`${API_BASE}/api/admin/contact-settings`, { headers: authHeaders() });
-  return parseJson(res);
+  const res = await API.get("/admin/contact-settings");
+  return res.data;
 }
 export async function updateAdminContactSettings(payload) {
-  const res = await fetch(`${API_BASE}/api/admin/contact-settings`, { method: "POST", headers: authHeaders(), body: JSON.stringify(payload) });
-  return parseJson(res);
+  const res = await API.post("/admin/contact-settings", payload);
+  return res.data;
 }
+
+export default API;

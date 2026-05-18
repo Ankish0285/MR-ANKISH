@@ -39,8 +39,8 @@ app.config["SECRET_KEY"] = _secret
 
 # Configure CORS for production and development
 _origins_raw = os.getenv("ALLOWED_ORIGINS", "https://mr-ankish.vercel.app").split(",")
-# Strip whitespace and trailing slashes from origins for reliable matching
-ALLOWED_ORIGINS = [o.strip().rstrip("/") for o in _origins_raw if o.strip()]
+# Strip whitespace, trailing slashes, AND backticks/quotes for reliable matching
+ALLOWED_ORIGINS = [o.strip().rstrip("/").strip("`").strip("'").strip('"') for o in _origins_raw if o.strip()]
 
 CORS(app, resources={
     r"/api/*": {
