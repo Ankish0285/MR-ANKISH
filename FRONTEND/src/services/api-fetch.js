@@ -1,20 +1,4 @@
-/**
- * Fetch API Service Module
- * 
- * This is an alternative to the Axios API service that uses the native Fetch API.
- * Use this if you want to avoid the axios dependency.
- * 
- * Features:
- * - Request/response interceptors
- * - Automatic token injection for admin endpoints
- * - Error handling with server status detection
- * - Support for form data and multipart uploads
- * 
- * Usage:
- * Replace api.js imports with this file or use alongside axios API
- */
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://mr-ankish.onrender.com';
 
 const TOKEN_KEY = 'admin_token';
 
