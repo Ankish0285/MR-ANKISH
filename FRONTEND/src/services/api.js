@@ -1,7 +1,11 @@
 import axios from "axios";
 
-// Production: Use deployed backend URL from env, Dev: Use local proxy
-const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
+});
+
+export default API;
 
 const TOKEN_KEY = "admin_token";
 
@@ -17,12 +21,6 @@ export function setAdminToken(token) {
 export function clearAdminToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
-
-// Create Axios instance
-const API = axios.create({
-  baseURL: API_BASE,
-  withCredentials: true,
-});
 
 // Request interceptor for auth
 API.interceptors.request.use((config) => {
@@ -309,5 +307,3 @@ export async function saveAdminContactSettings(payload) {
   const res = await API.post("/admin/contact-settings", payload);
   return res.data;
 }
-
-export default API;
