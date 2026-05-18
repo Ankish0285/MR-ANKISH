@@ -37,10 +37,18 @@ if not _secret:
     _secret = "dev-only-set-SECRET_KEY-in-dotenv"
 app.config["SECRET_KEY"] = _secret
 
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+if "https://mr-ankish.vercel.app" not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS.append("https://mr-ankish.vercel.app")
+
 # Configure CORS for production and development
 CORS(
     app,
-    origins=os.getenv("ALLOWED_ORIGINS", "").split(","),
+    origins=ALLOWED_ORIGINS,
     supports_credentials=True
 )
 
