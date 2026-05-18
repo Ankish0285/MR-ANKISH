@@ -154,6 +154,15 @@ export async function adminLogin(username, password) {
   return data;
 }
 
+export async function adminUploadImage(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await API.post("/admin/upload", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+}
+
 // Admin Home
 export async function fetchAdminHome() {
   const res = await API.get("/admin/home");
@@ -277,7 +286,7 @@ export async function fetchAdminContentCreator() {
   const res = await API.get("/admin/content-creator");
   return res.data;
 }
-export async function updateAdminContentCreator(payload) {
+export async function saveAdminContentCreator(payload) {
   const res = await API.post("/admin/content-creator", payload);
   return res.data;
 }
@@ -287,7 +296,7 @@ export async function fetchAdminSiteSettings() {
   const res = await API.get("/admin/site-settings");
   return res.data;
 }
-export async function updateAdminSiteSettings(payload) {
+export async function saveAdminSiteSettings(payload) {
   const res = await API.post("/admin/site-settings", payload);
   return res.data;
 }
@@ -296,7 +305,7 @@ export async function fetchAdminContactSettings() {
   const res = await API.get("/admin/contact-settings");
   return res.data;
 }
-export async function updateAdminContactSettings(payload) {
+export async function saveAdminContactSettings(payload) {
   const res = await API.post("/admin/contact-settings", payload);
   return res.data;
 }
