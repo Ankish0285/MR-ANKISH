@@ -66,7 +66,16 @@ export default function Hero() {
         ) : (
           <>
             {/* Visually hidden H1 for Google SEO Ranking */}
-            <h1 className="sr-only">Voice of Ankish 7 | Ankish Kumar India | Bharat Ek Kahani | Portfolio</h1>
+            <div className="sr-only">
+              <h1>Mr Ankish</h1>
+              <h2>Voice of Ankish 7</h2>
+              <h3>Ankish Kumar India</h3>
+              <p>
+                Official portfolio of Mr Ankish (Ankish Kumar India), a dedicated AI Developer and Web Developer. 
+                Creator of Voice of Ankish 7 and the Bharat Ek Kahani project. Exploring the intersection of 
+                modern web technologies and creative storytelling.
+              </p>
+            </div>
 
             <motion.p
               className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-orange-400/90"
