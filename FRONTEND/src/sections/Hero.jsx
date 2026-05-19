@@ -79,11 +79,16 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.08 }}
             >
-              Hi, I&apos;m{" "}
-              <span className="bg-linear-to-r from-[#ff7a18] to-[#ffb347] bg-clip-text text-transparent">
-                {home?.name}
-              </span>
+              Voice of Ankish 7
             </motion.h1>
+            <motion.h2
+              className="mt-4 font-display text-2xl font-bold tracking-tight text-slate-300 sm:text-3xl md:text-4xl"
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.12 }}
+            >
+              Ankish Kumar India
+            </motion.h2>
             <div className="mx-auto mt-5 max-w-xl space-y-3 text-lg text-slate-300 sm:text-xl">
               {bioParts.slice(0, 2).map((para, i) => (
                 <motion.p
