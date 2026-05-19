@@ -107,15 +107,20 @@ def view_resume():
     
     try:
         # Proxy the request to Cloudinary to keep the user on our domain
-        resp = requests.get(url, stream=True, timeout=10)
+        resp = requests.get(url, stream=True, timeout=15)
         resp.raise_for_status()
         
+        def generate():
+            for chunk in resp.iter_content(chunk_size=8192):
+                yield chunk
+
         return Response(
-            resp.content,
+            generate(),
             mimetype='application/pdf',
             headers={
                 "Content-Disposition": "inline; filename=resume.pdf",
-                "Cache-Control": "public, max-age=3600"
+                "Cache-Control": "public, max-age=3600",
+                "Content-Length": resp.headers.get('Content-Length')
             }
         )
     except Exception as e:
@@ -135,15 +140,20 @@ def download_resume():
     
     try:
         # Proxy the request to Cloudinary for direct download
-        resp = requests.get(url, stream=True, timeout=10)
+        resp = requests.get(url, stream=True, timeout=15)
         resp.raise_for_status()
         
+        def generate():
+            for chunk in resp.iter_content(chunk_size=8192):
+                yield chunk
+
         return Response(
-            resp.content,
+            generate(),
             mimetype='application/pdf',
             headers={
                 "Content-Disposition": "attachment; filename=resume.pdf",
-                "Cache-Control": "no-cache"
+                "Cache-Control": "no-cache",
+                "Content-Length": resp.headers.get('Content-Length')
             }
         )
     except Exception as e:
