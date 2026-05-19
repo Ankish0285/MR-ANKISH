@@ -1,7 +1,7 @@
 // Normalizing casing to frontend tree
 import { motion } from "framer-motion";
 import { Mail, ExternalLink } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import {
   IconGithub,
   IconInstagram,
@@ -12,58 +12,40 @@ import {
 } from "../components/SocialIcons.jsx";
 import { Button } from "../components/ui/Button.jsx";
 import { SOCIAL } from "../constants.js";
-import { fetchContactSettingsPublic, sendContact } from "../services/api.js";
+import { sendContact } from "../services/api.js";
+import { useSiteSettings } from "../context/SiteSettingsContext.jsx";
 
 const DEFAULT_BLURB =
   "Have a project or role in mind? Send a message — I will get back to you.";
 
 function useContactDisplay() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { contact: s, loading } = useSiteSettings();
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const raw = await fetchContactSettingsPublic();
-      setData(raw);
-    } catch (e) {
-      console.error("Failed to load contact settings", e);
-      setData(null);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  const s = data || {};
-  const configured = Boolean(s.configured);
-  let emailHref = (s.email_href && String(s.email_href).trim()) || "";
-  if (!emailHref && s.public_email && String(s.public_email).trim()) {
+  const configured = Boolean(s && s.configured);
+  let emailHref = (s?.email_href && String(s.email_href).trim()) || "";
+  if (!emailHref && s?.public_email && String(s.public_email).trim()) {
     const pe = String(s.public_email).trim();
     if (pe.includes("@") && !pe.toLowerCase().startsWith("mailto:")) emailHref = `mailto:${pe}`;
     else emailHref = pe;
   }
   if (!emailHref && !configured) emailHref = SOCIAL.email;
 
-  const blurb = (s.blurb && String(s.blurb).trim()) || DEFAULT_BLURB;
+  const blurb = (s?.blurb && String(s.blurb).trim()) || DEFAULT_BLURB;
 
-  const gh = (s.github_url && String(s.github_url).trim()) || (!configured ? SOCIAL.github : "");
-  const li = (s.linkedin_url && String(s.linkedin_url).trim()) || (!configured ? SOCIAL.linkedin : "");
+  const gh = (s?.github_url && String(s.github_url).trim()) || (!configured ? SOCIAL.github : "");
+  const li = (s?.linkedin_url && String(s.linkedin_url).trim()) || (!configured ? SOCIAL.linkedin : "");
 
   const links = [
     { key: "github", url: gh, Icon: IconGithub, label: "GitHub" },
     { key: "linkedin", url: li, Icon: IconLinkedin, label: "LinkedIn" },
-    { key: "twitter", url: s.twitter_url && String(s.twitter_url).trim(), Icon: IconXSocial, label: "X" },
-    { key: "instagram", url: s.instagram_url && String(s.instagram_url).trim(), Icon: IconInstagram, label: "Instagram" },
-    { key: "youtube", url: s.youtube_url && String(s.youtube_url).trim(), Icon: IconYoutube, label: "YouTube" },
-    { key: "facebook", url: s.facebook_url && String(s.facebook_url).trim(), Icon: IconFacebook, label: "Facebook" },
+    { key: "twitter", url: s?.twitter_url && String(s.twitter_url).trim(), Icon: IconXSocial, label: "X" },
+    { key: "instagram", url: s?.instagram_url && String(s.instagram_url).trim(), Icon: IconInstagram, label: "Instagram" },
+    { key: "youtube", url: s?.youtube_url && String(s.youtube_url).trim(), Icon: IconYoutube, label: "YouTube" },
+    { key: "facebook", url: s?.facebook_url && String(s.facebook_url).trim(), Icon: IconFacebook, label: "Facebook" },
     { key: "email", url: emailHref, Icon: Mail, label: "Email" },
   ];
 
-  if (Array.isArray(s.extra_socials)) {
+  if (s && Array.isArray(s.extra_socials)) {
     s.extra_socials.forEach((extra, idx) => {
       if (extra.url && extra.url.trim()) {
         links.push({

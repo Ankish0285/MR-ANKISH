@@ -131,7 +131,12 @@ export async function fetchSiteSettings() {
 }
 
 export async function fetchContactSettingsPublic() {
-  return fetchSiteSettings();
+  try {
+    const res = await API.get("/contact-settings");
+    return res.data ? mapId(res.data) : {};
+  } catch (error) {
+    return {};
+  }
 }
 
 export async function submitContact(payload) {
