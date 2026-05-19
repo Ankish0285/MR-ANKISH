@@ -583,26 +583,26 @@ def delete_project(pid):
 # --- Site settings (visibility) ---
 
 
-@admin_bp.get("/site-settings")
+@admin_bp.route("/site-settings", methods=["GET", "POST", "PUT"])
 @require_admin
-def admin_get_site_settings():
+def admin_site_settings():
     db = get_db()
-    doc = db.site_settings.find_one({"_id": "main"})
-    return jsonify(serialize_site_settings(doc))
+    if request.method == "GET":
+        doc = db.site_settings.find_one({"_id": "main"})
+        return jsonify(serialize_site_settings(doc))
 
-
-@admin_bp.put("/site-settings")
-@require_admin
-def admin_put_site_settings():
     data = request.get_json(silent=True) or {}
-    vis_in = data.get("visibility") or {}
+    # If the frontend sends { hero: true, ... } directly, or { visibility: { hero: true } }
+    vis_in = data.get("visibility") if "visibility" in data else data
+    
     if not isinstance(vis_in, dict):
         return jsonify({"error": "visibility must be an object"}), 400
+        
     merged = dict(DEFAULT_VISIBILITY)
     for k in DEFAULT_VISIBILITY:
         if k in vis_in:
             merged[k] = bool(vis_in[k])
-    db = get_db()
+            
     db.site_settings.update_one(
         {"_id": "main"},
         {"$set": {"visibility": merged, "updated_at": datetime.now(timezone.utc)}},
