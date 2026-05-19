@@ -103,10 +103,8 @@ def view_resume():
         return jsonify({"error": "Resume link not found"}), 404
     
     url = doc["resume_link"]
-    # Transform Cloudinary URL for direct viewing: /image/upload/ -> /raw/upload/
-    if "cloudinary.com" in url and "/image/upload/" in url:
-        url = url.replace("/image/upload/", "/raw/upload/")
-    
+    # For viewing, just redirect to the original URL. 
+    # Browsers handle PDFs natively. No need to force 'raw' which causes 404 if uploaded as 'image'.
     return redirect(url)
 
 
@@ -118,11 +116,9 @@ def download_resume():
         return jsonify({"error": "Resume link not found"}), 404
     
     url = doc["resume_link"]
-    # Transform Cloudinary URL for direct download: /image/upload/ -> /raw/upload/fl_attachment/
-    if "cloudinary.com" in url:
-        if "/image/upload/" in url:
-            url = url.replace("/image/upload/", "/raw/upload/fl_attachment/")
-        elif "/raw/upload/" in url and "fl_attachment" not in url:
-            url = url.replace("/raw/upload/", "/raw/upload/fl_attachment/")
+    # For direct download, we just need to add 'fl_attachment' flag after '/upload/'
+    # This works for both /image/upload/ and /raw/upload/
+    if "cloudinary.com" in url and "/upload/" in url and "fl_attachment" not in url:
+        url = url.replace("/upload/", "/upload/fl_attachment/")
             
     return redirect(url)
