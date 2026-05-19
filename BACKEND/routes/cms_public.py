@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, current_app, request
+from flask import Blueprint, jsonify, current_app, request, redirect
 from datetime import datetime, timedelta, timezone
 
 from models.db import get_db
@@ -93,3 +93,36 @@ def public_contact_settings():
     db = get_db()
     doc = db.contact_settings.find_one({"_id": "main"})
     return jsonify(serialize_contact_settings(doc or {}))
+
+
+@cms_public_bp.route("/resume/view")
+def view_resume():
+    db = get_db()
+    doc = db.abouts.find_one(sort=[("_id", 1)])
+    if not doc or not doc.get("resume_link"):
+        return jsonify({"error": "Resume link not found"}), 404
+    
+    url = doc["resume_link"]
+    # Transform Cloudinary URL for direct viewing: /image/upload/ -> /raw/upload/
+    if "cloudinary.com" in url and "/image/upload/" in url:
+        url = url.replace("/image/upload/", "/raw/upload/")
+    
+    return redirect(url)
+
+
+@cms_public_bp.route("/resume/download")
+def download_resume():
+    db = get_db()
+    doc = db.abouts.find_one(sort=[("_id", 1)])
+    if not doc or not doc.get("resume_link"):
+        return jsonify({"error": "Resume link not found"}), 404
+    
+    url = doc["resume_link"]
+    # Transform Cloudinary URL for direct download: /image/upload/ -> /raw/upload/fl_attachment/
+    if "cloudinary.com" in url:
+        if "/image/upload/" in url:
+            url = url.replace("/image/upload/", "/raw/upload/fl_attachment/")
+        elif "/raw/upload/" in url and "fl_attachment" not in url:
+            url = url.replace("/raw/upload/", "/raw/upload/fl_attachment/")
+            
+    return redirect(url)

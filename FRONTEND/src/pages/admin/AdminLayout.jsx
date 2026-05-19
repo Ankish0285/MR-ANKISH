@@ -86,13 +86,24 @@ export default function AdminLayout() {
           <button
             type="button"
             onClick={() => setSidebarOpen((v) => !v)}
-            className="rounded-lg border border-white/10 p-2 text-slate-400 hover:bg-white/5 hover:text-white md:flex"
+            className="rounded-lg border border-white/10 p-2 text-slate-400 hover:bg-white/5 hover:text-white"
             aria-label="Toggle sidebar"
           >
             <PanelLeft className="h-5 w-5" />
           </button>
           <span className="text-sm font-medium text-slate-400">Admin panel</span>
-          <div className="w-10" />
+          <div className="flex items-center gap-3">
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg border border-white/10 bg-slate-900/50 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+            >
+              <Eye className="h-3.5 w-3.5" />
+              Live Site
+            </a>
+            <div className="w-4" />
+          </div>
         </header>
 
         <motion.main

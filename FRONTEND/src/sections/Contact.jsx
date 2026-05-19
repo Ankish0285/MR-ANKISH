@@ -124,7 +124,7 @@ export default function Contact() {
                 key={key}
                 href={url}
                 target={key === "email" ? undefined : "_blank"}
-                rel={key === "email" ? undefined : "noreferrer"}
+                rel={key === "email" ? undefined : "noopener noreferrer"}
                 whileHover={{ scale: 1.06 }}
                 className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 text-slate-300 hover:border-orange-500/40 hover:text-orange-400"
                 aria-label={label}

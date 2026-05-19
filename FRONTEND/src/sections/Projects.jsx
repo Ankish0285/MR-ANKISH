@@ -23,7 +23,7 @@ function ProjectCard({ project, index }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/40 shadow-xl shadow-black/30 backdrop-blur-sm"
     >
       <div className="relative aspect-16/10 overflow-hidden bg-slate-800">
-        <a href={demo || github || "#"} target="_blank" rel="noreferrer" className="block h-full w-full">
+        <a href={demo || github || "#"} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
           <img
             src={
               project.image_url ||
@@ -37,7 +37,7 @@ function ProjectCard({ project, index }) {
       </div>
       <div className="flex flex-1 flex-col p-6">
         <h3 className="font-display text-xl font-semibold text-white">
-          <a href={demo || github || "#"} target="_blank" rel="noreferrer" className="hover:text-orange-400 transition">
+          <a href={demo || github || "#"} target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition">
             {project.title}
           </a>
         </h3>
@@ -59,7 +59,7 @@ function ProjectCard({ project, index }) {
             <motion.a
               href={demo}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-[#ff7a18] to-[#ffb347] px-4 py-2 text-sm font-semibold text-slate-950"
@@ -72,7 +72,7 @@ function ProjectCard({ project, index }) {
             <motion.a
               href={github}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-600 bg-slate-800/60 px-4 py-2 text-sm text-slate-200"

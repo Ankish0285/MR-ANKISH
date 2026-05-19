@@ -615,23 +615,30 @@ def admin_put_site_settings():
 # --- Contact page (email + social links) ---
 
 
-@admin_bp.get("/contact-settings")
+@admin_bp.route("/contact-settings", methods=["GET", "POST", "PUT"])
 @require_admin
-def admin_get_contact_settings():
+def admin_contact_settings():
     db = get_db()
-    doc = db.contact_settings.find_one({"_id": "main"})
-    return jsonify(serialize_contact_settings(doc or {}))
+    if request.method == "GET":
+        doc = db.contact_settings.find_one({"_id": "main"})
+        return jsonify(serialize_contact_settings(doc or {}))
 
-
-@admin_bp.put("/contact-settings")
-@require_admin
-def admin_put_contact_settings():
     data = request.get_json(silent=True) or {}
-    db = get_db()
     update = {}
     for k in CONTACT_SETTING_KEYS:
         v = data.get(k)
+        # Prevent undefined/null values, ensure strings
         update[k] = (str(v).strip() if v is not None else "") or ""
+    
+    # Handle extra_socials specifically if it's in the schema
+    if "extra_socials" in data:
+        extra = data.get("extra_socials")
+        if isinstance(extra, list):
+            update["extra_socials"] = [
+                {"label": str(s.get("label", "")).strip(), "url": str(s.get("url", "")).strip()}
+                for s in extra if isinstance(s, dict)
+            ]
+
     update["updated_at"] = datetime.now(timezone.utc)
     db.contact_settings.update_one({"_id": "main"}, {"$set": update}, upsert=True)
     doc = db.contact_settings.find_one({"_id": "main"})

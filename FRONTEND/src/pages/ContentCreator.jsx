@@ -196,7 +196,7 @@ export default function Content() {
                     whileTap={{ scale: 0.95 }}
                     href={s.subscribe_url} 
                     target="_blank" 
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-3 rounded-2xl bg-red-600 px-8 py-4 text-base font-black text-white hover:bg-red-500 transition-all shadow-xl shadow-red-600/30"
                   >
                     <Youtube className="h-6 w-6" />
@@ -246,7 +246,7 @@ export default function Content() {
                 <h2 className="font-display text-4xl font-black text-white md:text-5xl">Featured <span className="text-orange-500">Creations</span></h2>
                 <p className="text-slate-400 mt-4 text-lg">Handpicked tutorials and projects that showcase my skills.</p>
               </div>
-              <a href={s.subscribe_url} target="_blank" rel="noreferrer" className="group flex items-center gap-2 text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors">
+              <a href={s.subscribe_url} target="_blank" rel="noopener noreferrer" className="group flex items-center gap-2 text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors">
                 VIEW ALL VIDEOS <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </a>
             </div>
@@ -265,7 +265,7 @@ export default function Content() {
                     <a 
                       href={video.link} 
                       target="_blank" 
-                      rel="noreferrer" 
+                      rel="noopener noreferrer" 
                       className="block h-full w-full"
                       onClick={(e) => handleVideoClick(e, video.link)}
                     >
@@ -292,7 +292,7 @@ export default function Content() {
                       <a 
                         href={video.link} 
                         target="_blank" 
-                        rel="noreferrer"
+                        rel="noopener noreferrer"
                         onClick={(e) => handleVideoClick(e, video.link)}
                       >
                         {video.title}
@@ -305,7 +305,7 @@ export default function Content() {
                       <a 
                         href={video.link} 
                         target="_blank" 
-                        rel="noreferrer" 
+                        rel="noopener noreferrer" 
                         className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-white group/link"
                         onClick={(e) => handleVideoClick(e, video.link)}
                       >
@@ -338,7 +338,7 @@ export default function Content() {
                   whileHover={{ y: -10, scale: 1.02 }}
                   href={short.link}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   onClick={(e) => handleVideoClick(e, short.link)}
                   className="relative h-112.5 w-72 shrink-0 overflow-hidden rounded-[2.5rem] border-2 border-white/5 bg-slate-900 snap-start group cursor-pointer shadow-2xl transition-all hover:border-red-500/40"
                 >
@@ -389,7 +389,7 @@ export default function Content() {
                   transition={{ delay: i * 0.1 }}
                   href={p.link || "#"}
                   target="_blank" 
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   onClick={(e) => handleVideoClick(e, p.link)}
                   className="group relative block overflow-hidden rounded-3xl border border-white/10 bg-slate-900/40 p-5 text-left shadow-xl backdrop-blur-xl transition-all hover:border-purple-500/40 hover:bg-slate-900/60"
                 >
@@ -480,7 +480,7 @@ export default function Content() {
                   whileTap={{ scale: 0.95 }}
                   href={s.subscribe_url} 
                   target="_blank" 
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="w-full sm:w-auto rounded-2xl bg-white px-12 py-5 text-base font-black text-slate-950 hover:bg-orange-500 hover:text-white transition-all shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)]"
                 >
                   SUBSCRIBE NOW

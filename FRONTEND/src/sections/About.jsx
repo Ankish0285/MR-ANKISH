@@ -83,16 +83,24 @@ export default function About() {
             </div>
           )}
           {about?.resume_link ? (
-            <motion.a
-              href={about.resume_link}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-8 inline-flex rounded-xl border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/20"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              Download resume
-            </motion.a>
+            <div className="mt-8 flex flex-wrap gap-4">
+              <motion.button
+                onClick={() => window.open(`${import.meta.env.VITE_API_URL}/resume/view`, "_blank")}
+                className="inline-flex rounded-xl border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/20"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                View resume
+              </motion.button>
+              <motion.button
+                onClick={() => window.location.href = `${import.meta.env.VITE_API_URL}/resume/download`}
+                className="inline-flex rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-white/10"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Download PDF
+              </motion.button>
+            </div>
           ) : null}
         </motion.div>
       </div>
