@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, current_app, request, redirect
+from flask import Blueprint, jsonify, current_app, request, redirect, Response
+import requests
 from datetime import datetime, timedelta, timezone
 
 from models.db import get_db
@@ -103,9 +104,24 @@ def view_resume():
         return jsonify({"error": "Resume link not found"}), 404
     
     url = doc["resume_link"]
-    # For viewing, just redirect to the original URL. 
-    # Browsers handle PDFs natively. No need to force 'raw' which causes 404 if uploaded as 'image'.
-    return redirect(url)
+    
+    try:
+        # Proxy the request to Cloudinary to keep the user on our domain
+        resp = requests.get(url, stream=True, timeout=10)
+        resp.raise_for_status()
+        
+        return Response(
+            resp.content,
+            mimetype='application/pdf',
+            headers={
+                "Content-Disposition": "inline; filename=resume.pdf",
+                "Cache-Control": "public, max-age=3600"
+            }
+        )
+    except Exception as e:
+        print(f"Proxy Error: {e}")
+        # Fallback to redirect if proxy fails
+        return redirect(url)
 
 
 @cms_public_bp.route("/resume/download")
@@ -116,9 +132,23 @@ def download_resume():
         return jsonify({"error": "Resume link not found"}), 404
     
     url = doc["resume_link"]
-    # For direct download, we just need to add 'fl_attachment' flag after '/upload/'
-    # This works for both /image/upload/ and /raw/upload/
-    if "cloudinary.com" in url and "/upload/" in url and "fl_attachment" not in url:
-        url = url.replace("/upload/", "/upload/fl_attachment/")
-            
-    return redirect(url)
+    
+    try:
+        # Proxy the request to Cloudinary for direct download
+        resp = requests.get(url, stream=True, timeout=10)
+        resp.raise_for_status()
+        
+        return Response(
+            resp.content,
+            mimetype='application/pdf',
+            headers={
+                "Content-Disposition": "attachment; filename=resume.pdf",
+                "Cache-Control": "no-cache"
+            }
+        )
+    except Exception as e:
+        print(f"Proxy Error: {e}")
+        # Fallback to direct download URL if proxy fails
+        if "cloudinary.com" in url and "/upload/" in url and "fl_attachment" not in url:
+            url = url.replace("/upload/", "/upload/fl_attachment/")
+        return redirect(url)
