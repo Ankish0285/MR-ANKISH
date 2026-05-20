@@ -114,42 +114,15 @@ def delete_message(mid):
 # --- Home (singleton) ---
 
 
-@admin_bp.get("/home")
+@admin_bp.route("/home", methods=["GET", "POST", "PUT"])
 @require_admin
-def admin_get_home():
+def admin_home():
     db = get_db()
-    doc = db.homes.find_one(sort=[("_id", 1)])
-    return jsonify({"item": serialize_home(doc)})
+    if request.method == "GET":
+        doc = db.homes.find_one(sort=[("_id", 1)])
+        return jsonify({"item": serialize_home(doc)})
 
-
-@admin_bp.post("/home")
-@require_admin
-def admin_post_home():
-    db = get_db()
-    if db.homes.find_one():
-        return jsonify({"error": "Home already exists. Use PUT /api/admin/home/<id>."}), 409
     data = request.get_json(silent=True) or {}
-    doc = {
-        "name": (data.get("name") or "").strip(),
-        "title": (data.get("title") or "").strip(),
-        "bio": (data.get("bio") or "").strip(),
-        "profile_image": (data.get("profile_image") or "").strip() or None,
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
-    }
-    r = db.homes.insert_one(doc)
-    doc["_id"] = r.inserted_id
-    return jsonify(serialize_home(doc)), 201
-
-
-@admin_bp.put("/home/<hid>")
-@require_admin
-def admin_put_home(hid):
-    oid = _oid(hid)
-    if oid is None:
-        return jsonify({"error": "Invalid id"}), 400
-    data = request.get_json(silent=True) or {}
-    db = get_db()
     update = {
         "name": (data.get("name") or "").strip(),
         "title": (data.get("title") or "").strip(),
@@ -157,10 +130,16 @@ def admin_put_home(hid):
         "profile_image": (data.get("profile_image") or "").strip() or None,
         "updated_at": datetime.now(timezone.utc),
     }
-    r = db.homes.update_one({"_id": oid}, {"$set": update})
-    if r.matched_count == 0:
-        return jsonify({"error": "Not found"}), 404
-    doc = db.homes.find_one({"_id": oid})
+
+    # Use update_one with upsert=True on a fixed ID to ensure only ONE home document exists
+    # This automatically "replaces" or updates the existing data
+    db.homes.update_one(
+        {"_id": "main_home"}, 
+        {"$set": update, "$setOnInsert": {"created_at": datetime.now(timezone.utc)}}, 
+        upsert=True
+    )
+    
+    doc = db.homes.find_one({"_id": "main_home"})
     return jsonify(serialize_home(doc))
 
 
@@ -180,63 +159,28 @@ def admin_delete_home(hid):
 # --- About (singleton) ---
 
 
-@admin_bp.get("/about")
+@admin_bp.route("/about", methods=["GET", "POST", "PUT"])
 @require_admin
-def admin_get_about():
+def admin_about():
     db = get_db()
-    doc = db.abouts.find_one(sort=[("_id", 1)])
-    return jsonify({"item": serialize_about(doc)})
+    if request.method == "GET":
+        doc = db.abouts.find_one(sort=[("_id", 1)])
+        return jsonify({"item": serialize_about(doc)})
 
-
-@admin_bp.post("/about")
-@require_admin
-def admin_post_about():
-    db = get_db()
-    if db.abouts.find_one():
-        return jsonify({"error": "About already exists. Use PUT /api/admin/about/<id>."}), 409
     data = request.get_json(silent=True) or {}
-    doc = {
-        "description": (data.get("description") or "").strip(),
-        "resume_link": (data.get("resume_link") or "").strip() or None,
-        "created_at": datetime.now(timezone.utc),
-        "updated_at": datetime.now(timezone.utc),
-    }
-    r = db.abouts.insert_one(doc)
-    doc["_id"] = r.inserted_id
-    return jsonify(serialize_about(doc)), 201
-
-
-@admin_bp.put("/about/<aid>")
-@require_admin
-def admin_put_about(aid):
-    oid = _oid(aid)
-    if oid is None:
-        return jsonify({"error": "Invalid id"}), 400
-    data = request.get_json(silent=True) or {}
-    db = get_db()
     update = {
         "description": (data.get("description") or "").strip(),
         "resume_link": (data.get("resume_link") or "").strip() or None,
         "updated_at": datetime.now(timezone.utc),
     }
-    r = db.abouts.update_one({"_id": oid}, {"$set": update})
-    if r.matched_count == 0:
-        return jsonify({"error": "Not found"}), 404
-    doc = db.abouts.find_one({"_id": oid})
+
+    db.abouts.update_one(
+        {"_id": "main_about"},
+        {"$set": update, "$setOnInsert": {"created_at": datetime.now(timezone.utc)}},
+        upsert=True
+    )
+    doc = db.abouts.find_one({"_id": "main_about"})
     return jsonify(serialize_about(doc))
-
-
-@admin_bp.delete("/about/<aid>")
-@require_admin
-def admin_delete_about(aid):
-    oid = _oid(aid)
-    if oid is None:
-        return jsonify({"error": "Invalid id"}), 400
-    db = get_db()
-    r = db.abouts.delete_one({"_id": oid})
-    if r.deleted_count == 0:
-        return jsonify({"error": "Not found"}), 404
-    return jsonify({"ok": True})
 
 
 # --- Skills ---
