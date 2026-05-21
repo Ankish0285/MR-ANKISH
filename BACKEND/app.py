@@ -10,7 +10,6 @@ from models.db import DatabaseUnavailable, init_db, mongo_status
 from routes.admin import admin_bp
 from routes.cms_public import cms_public_bp
 from routes.contact import contact_bp
-from routes.projects import projects_bp
 
 ROOT = Path(__file__).resolve().parent.parent
 BACKEND_DIR = Path(__file__).resolve().parent
@@ -52,7 +51,6 @@ CORS(
     supports_credentials=True
 )
 
-app.register_blueprint(projects_bp, url_prefix="/api")
 app.register_blueprint(cms_public_bp, url_prefix="/api")
 app.register_blueprint(contact_bp, url_prefix="/api")
 app.register_blueprint(admin_bp, url_prefix="/api/admin")

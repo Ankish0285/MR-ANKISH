@@ -144,7 +144,16 @@ export default function Projects() {
           </motion.div>
         )}
         {!loading && !error && projects.length === 0 && (
-          <p className="mt-12 text-center text-slate-500">No projects yet.</p>
+          <div className="mt-12 text-center">
+            <p className="text-slate-500 italic">No visible projects found in the database.</p>
+            <p className="mt-2 text-xs text-slate-600">If you just added one, please wait a minute for the database to sync and try refreshing.</p>
+            <button 
+              onClick={() => load()}
+              className="mt-4 text-orange-400 text-sm hover:underline"
+            >
+              Check again
+            </button>
+          </div>
         )}
         <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((p, i) => (

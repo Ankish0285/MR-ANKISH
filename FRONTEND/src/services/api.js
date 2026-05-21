@@ -58,9 +58,9 @@ const mapId = (item) => ({
 
 export async function fetchProjects() {
   try {
-    const res = await API.get("/projects");
+    // Add timestamp to bypass potential caching
+    const res = await API.get(`/projects?t=${Date.now()}`);
     const data = res.data;
-    // Handle both { projects: [...] } and direct array [...]
     const projects = Array.isArray(data) ? data : (data && data.projects ? data.projects : []);
     return projects.map(mapId);
   } catch (error) {
