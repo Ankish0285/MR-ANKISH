@@ -429,17 +429,15 @@ def admin_delete_achievement(aid):
 # --- Projects (admin list + CRUD) ---
 
 
-@admin_bp.get("/projects")
+@admin_bp.route("/projects", methods=["GET", "POST"])
 @require_admin
-def admin_list_projects():
+def admin_projects():
     db = get_db()
-    cursor = db.projects.find().sort("created_at", -1)
-    return jsonify([serialize_project(d, admin=True) for d in cursor])
-
-
-@admin_bp.post("/project")
-@require_admin
-def create_project():
+    if request.method == "GET":
+        cursor = db.projects.find().sort("created_at", -1)
+        return jsonify([serialize_project(d, admin=True) for d in cursor])
+    
+    # POST
     data = request.get_json(silent=True) or {}
     title = (data.get("title") or "").strip()
     if not title:
@@ -465,20 +463,27 @@ def create_project():
         "visible": visible,
         "created_at": datetime.now(timezone.utc),
     }
-    db = get_db()
     result = db.projects.insert_one(doc)
     doc["_id"] = result.inserted_id
     return jsonify(serialize_project(doc, admin=True)), 201
 
 
-@admin_bp.put("/project/<pid>")
+@admin_bp.route("/projects/<pid>", methods=["PUT", "DELETE"])
 @require_admin
-def update_project(pid):
+def admin_project_item(pid):
     oid = _oid(pid)
     if oid is None:
         return jsonify({"error": "Invalid project id"}), 400
-    data = request.get_json(silent=True) or {}
     db = get_db()
+    
+    if request.method == "DELETE":
+        result = db.projects.delete_one({"_id": oid})
+        if result.deleted_count == 0:
+            return jsonify({"error": "Not found"}), 404
+        return jsonify({"ok": True})
+    
+    # PUT
+    data = request.get_json(silent=True) or {}
     existing = db.projects.find_one({"_id": oid})
     if not existing:
         return jsonify({"error": "Not found"}), 404
@@ -509,19 +514,6 @@ def update_project(pid):
     db.projects.update_one({"_id": oid}, {"$set": update})
     doc = db.projects.find_one({"_id": oid})
     return jsonify(serialize_project(doc, admin=True))
-
-
-@admin_bp.delete("/project/<pid>")
-@require_admin
-def delete_project(pid):
-    oid = _oid(pid)
-    if oid is None:
-        return jsonify({"error": "Invalid project id"}), 400
-    db = get_db()
-    result = db.projects.delete_one({"_id": oid})
-    if result.deleted_count == 0:
-        return jsonify({"error": "Not found"}), 404
-    return jsonify({"ok": True})
 
 
 # --- Site settings (visibility) ---
