@@ -10,6 +10,7 @@ from models.serializers import (
     serialize_content_creator,
     serialize_experience,
     serialize_home,
+    serialize_project,
     serialize_site_settings,
     serialize_skill,
 )
@@ -43,6 +44,15 @@ def public_skills():
     db = get_db()
     cursor = db.skills.find().sort([("order", 1), ("created_at", -1)])
     return jsonify([serialize_skill(d) for d in cursor])
+
+
+@cms_public_bp.route("/projects", methods=["GET", "OPTIONS"])
+def public_projects():
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
+    db = get_db()
+    cursor = db.projects.find({"visible": {"$ne": False}}).sort("created_at", -1)
+    return jsonify({"projects": [serialize_project(d) for d in cursor]})
 
 
 @cms_public_bp.route("/experience", methods=["GET", "OPTIONS"])
