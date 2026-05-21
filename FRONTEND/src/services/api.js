@@ -60,9 +60,11 @@ export async function fetchProjects() {
   try {
     const res = await API.get("/projects");
     const data = res.data;
-    const projects = data && data.projects ? data.projects : [];
+    // Handle both { projects: [...] } and direct array [...]
+    const projects = Array.isArray(data) ? data : (data && data.projects ? data.projects : []);
     return projects.map(mapId);
   } catch (error) {
+    console.error("fetchProjects error:", error);
     return [];
   }
 }

@@ -52,7 +52,8 @@ def public_projects():
         return jsonify({"ok": True}), 200
     db = get_db()
     cursor = db.projects.find({"visible": {"$ne": False}}).sort("created_at", -1)
-    return jsonify({"projects": [serialize_project(d) for d in cursor]})
+    # Returning direct array to match mapId logic in frontend
+    return jsonify([serialize_project(d) for d in cursor])
 
 
 @cms_public_bp.route("/experience", methods=["GET", "OPTIONS"])
